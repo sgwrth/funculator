@@ -9,14 +9,34 @@ const getA = () => (<HTMLInputElement>document.getElementById("firstValue")).val
 const getB = () => (<HTMLInputElement>document.getElementById("secondValue")).value
 const setResult = (result) => document.getElementById("result").innerHTML = result;
 
-const addButton = document.getElementById("addition");
-addButton.addEventListener("click", () => { setResult(calculate(add, getA(), getB())); });
+const operationMaps = [
+    {
+        name: "addition",
+        func: add,
+    },
+    {
+        name: "subtraction",
+        func: subtract,
+    },
+    {
+        name: "multiplication",
+        func: multiply,
+    },
+    {
+        name: "division",
+        func: divide,
+    }
+];
 
-const subtractButton = document.getElementById("multiplication");
-subtractButton.addEventListener("click", () => { setResult(calculate(subtract, getA(), getB())); });
+const getButton = (opMap, result, calc, a, b) => {
+    const button = document.getElementById(opMap.name);
+    button.addEventListener("click", () => { result(calc(opMap.func, a(), b())); });
+    return button;
+}
 
-const multiplyButton = document.getElementById("multiplication");
-multiplyButton.addEventListener("click", () => { setResult(calculate(multiply, getA(), getB())); });
-
-const divideButton = document.getElementById("division");
-divideButton.addEventListener("click", () => { setResult(calculate(divide, getA(), getB())); });
+const createButton = (opMaps, button, result, calc, a, b) => {
+    if (opMaps.length === 0) { return; };
+    return [button(opMaps[0], result, calc, a, b)]
+        .concat(createButton(opMaps.slice(1), button, result, calc, a, b));
+}
+const buttons = createButton(operationMaps, getButton, setResult, calculate, getA, getB);

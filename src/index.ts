@@ -1,15 +1,9 @@
-const add = (a, b) => Number(a) + Number(b);
-const subtract = (a, b) => Number(a) - Number(b);
-const multiply = (a, b) => Number(a) * Number(b);
-const divide = (a, b) => (Number(b) === 0) ? undefined : Number(a) / Number(b);
+const add = (a) => (b) => Number(a) + Number(b);
+const subtract = (a) => (b) => Number(a) - Number(b);
+const multiply = (a) => (b) => Number(a) * Number(b);
+const divide = (a) => (b) => (Number(b) != 0) ? Number(a) / Number(b) : undefined;
 
 const calculate = (operation) => (a, b) => operation(a, b);
-// more verbose version:
-// const calculate = (operation) => {
-//     return (a, b) => {
-//         return operation(a, b);
-//     }
-// }
 
 const getA = () => (<HTMLInputElement>document.getElementById("firstValue")).value;
 const getB = () => (<HTMLInputElement>document.getElementById("secondValue")).value
@@ -36,7 +30,7 @@ const operationMaps = [
 
 const getButton = (opMap, result, calc, a, b) => {
     const button = document.getElementById(opMap.name);
-    button.addEventListener("click", () => { result(calc(opMap.func)(a(), b())); });
+    button.addEventListener("click", () => { result(calc(opMap.func)(a())(b())); });
     return button;
 }
 

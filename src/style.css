@@ -5,15 +5,15 @@ body {
 
 .display {
     background-color: #ffffff;
-    width: 128px;
+    width: 168px;
     height: 24px;
     padding: 4px 0px 0px 4px;
 }
 
 .grid-container {
     display: grid;
-    grid-template-columns: min-content min-content min-content;
-    grid-template-rows: min-content min-content min-content;
+    grid-template-columns:  min-content min-content min-content min-content;
+    grid-template-rows:     min-content min-content min-content min-content;
 }
 
 .grid-cell {

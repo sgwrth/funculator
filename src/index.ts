@@ -3,7 +3,7 @@ const calculate = operation => a => b => operation(a)(b);
 const add = a => b => Number(a) + Number(b);
 const subtract = a => b => Number(a) - Number(b);
 const multiply = a => b => Number(a) * Number(b);
-const divide = a => b => (Number(b) != 0) ? Number(a) / Number(b) : undefined;
+const divide = a => b => (b != "0") ? Number(a) / Number(b) : undefined;
 
 const getVal = elemId => (<HTMLInputElement>document.getElementById(elemId)).value;
 const setResult = elemId => result => document.getElementById(elemId).innerHTML = result;
@@ -19,57 +19,107 @@ const numpadNumbers = [
     { name: "numpad-seven", value: "7", },
     { name: "numpad-eight", value: "8", },
     { name: "numpad-nine", value: "9", },
-    { name: "numpad-period", value: ".", },
+    // { name: "numpad-period", value: ".", },
 ];
 
-const createNumpadButtons = numpadNumbers => displayId => {
-    if (numpadNumbers.length != 0) {
-        return [getNumpadButton(numpadNumbers[0])(displayId)]
-            .concat(createNumpadButtons(numpadNumbers.slice(1))(displayId));
+const numpadOperations = [
+    { name: "numpad-plus", function: add, },
+    { name: "numpad-minus", function: subtract, },
+    { name: "numpad-times", function: multiply, },
+    { name: "numpad-by", function: divide, },
+];
+
+const initialCalcState = {
+    firstValue: "",
+    secondValue: "",
+    awaitingSecondValue: false,
+    operation: null,
+    display: "",
+};
+
+const inputValue = (state, value) => {
+    if (!state.awaitingSecondValue) {
+        return {
+            ...state,
+            firstValue: state.firstValue + value,
+            display: state.firstValue + value,
+        }
+    }
+    if (state.awaitingSecondValue) {
+        return {
+            ...state,
+            secondValue: state.secondValue + value,
+            display: state.secondValue + value,
+        }
+    }
+    return {
+        ...state,
     }
 };
 
-const getNumpadButton = numpadNumber => displayId => {
-    const numpadButton = document.getElementById(numpadNumber.name);
-    numpadButton.addEventListener("click", () => {
-        const display = document.getElementById(displayId);
-        display.innerHTML = setDisplayValue(numpadNumber.value)(display.innerHTML);
-    });
-    return numpadButton;
+const setOperation = (state, operation) => {
+    return {
+        ...state,
+        operation: operation.function,
+        awaitingSecondValue: true,
+        display: "",
+    }
 };
 
-const setDisplayValue = numpadValue => displayValue => {
-    return (addingSecondPeriod(numpadValue)(displayValue))
-        ? displayValue
-        : (displayValue + numpadValue).slice(0, 12);
-}
+const updateDisplay = (state, display) => {
+    display.innerHTML = state.display;
+};
 
-const addingSecondPeriod = numpadValue => displayValue => {
-    return numpadValue === "." && displayValue.indexOf(".") != -1
-}
+const showResult = (state, display) => {
+    display.innerHTML = String(state.operation(state.firstValue)(state.secondValue));
+};
 
-const numpadButtons = createNumpadButtons(numpadNumbers)("display");
+let calcState = initialCalcState;
 
-const operationMaps = [
-    { name: "addition", func: add, },
-    { name: "subtraction", func: subtract, },
-    { name: "multiplication", func: multiply, },
-    { name: "division", func: divide, }
-];
+const equalsButton = document.getElementById("numpad-equals");
+equalsButton.addEventListener("click", () => {
+    showResult(calcState, display);
+    calcState = initialCalcState;
+});
 
-const createButtons = opMaps => getButton => setResult => resId => calc => getVal => a => b => {
-    if (opMaps.length != 0) {
-    return [getButton(opMaps[0])(setResult)(resId)(calc)(getVal)(a)(b)]
-        .concat(createButtons(opMaps.slice(1))(getButton)(setResult)(resId)(calc)(getVal)(a)(b));
+const createNumpadOperationButtons = display => numpadOperations => {
+    if (numpadOperations.length != 0) {
+        return [getNumpadOperationButton(display)(numpadOperations[0])]
+            .concat(createNumpadOperationButtons(display)(numpadOperations.slice(1)));
     }
 }
 
-const getButton = opMap => result => resId => calc => getVal => valAId => valBId => {
-    const button = document.getElementById(opMap.name);
+const getNumpadOperationButton = display => numpadOperation => {
+    const button = document.getElementById(numpadOperation.name);
     button.addEventListener("click", () => {
-        result(resId)(calc(opMap.func)(getVal(valAId))(getVal(valBId)));
+        calcState = setOperation(calcState, numpadOperation);
+        updateDisplay(calcState, display);
     });
     return button;
 }
 
-const buttons = createButtons(operationMaps)(getButton)(setResult)("result")(calculate)(getVal)("firstValue")("secondValue");
+const getValueAndOperation = displayValue => operation => {
+    return [displayValue, operation];
+}
+
+const createNumpadButtons = numpadNumbers => display => {
+    if (numpadNumbers.length != 0) {
+        return [getNumpadButton(numpadNumbers[0])(display)]
+            .concat(createNumpadButtons(numpadNumbers.slice(1))(display));
+    }
+};
+
+const getNumpadButton = numpadNumber => display => {
+    const numpadButton = document.getElementById(numpadNumber.name);
+    numpadButton.addEventListener("click", () => {
+        calcState = inputValue(calcState, numpadNumber.value);
+        updateDisplay(calcState, display);
+    });
+    return numpadButton;
+};
+
+const display = document.getElementById("display");
+
+const numpadButtons = createNumpadButtons(numpadNumbers)(display);
+const numpadOperationButtons = createNumpadOperationButtons(display)(numpadOperations);
+

@@ -5,9 +5,8 @@ Creating a calculator app that utilizes principles of functional programming as 
 -  recursion
 -  currying
 -  pure functions
+-  closures
 
 To do:
 - implement logic for period button
 - use result of calculation as initial value for next calculation
-- more currying
-- refactoring

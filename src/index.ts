@@ -111,7 +111,11 @@ const createCalc = () => {
         display: "",
     };
 
-    const setCalcState = newState => newState;
+    const setCalcState = newState => {
+        return {
+            ...newState,
+        }
+    };
 
     return state;
 }
